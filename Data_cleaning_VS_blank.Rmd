@@ -14,9 +14,9 @@ library(tidyverse)
 
 # Load in the Visual Search experiment data
 ```{r}
-Samples <- 
-Fixations <- 
-Saccades <- 
+# Samples <- 
+Fixations <- read_csv(file = "./Data/Fixed/Fixations.csv") 
+Saccades <- read_csv(file = "./Data/Fixed/Saccades.csv")
 ```
 
 # Sanity checks
@@ -25,25 +25,60 @@ The first thing we want to do is to run some sanity checks on the sample data (x
 
 ```{r}
 ## Check distribution of raw samples. Is everything alright?
+hist(Fixations$PositionX)
+hist(Fixations$PositionY)
+hist(Fixations$PupilSize)
+hist(Saccades$EndX)
+
 
 ```
 
 If needed, remove artifacts and other "illegal" data points. The screen resolution at COBE Lab was 1050 x 1680. Any points outside this range should be excluded. Start by figuring out how frequent these points are. Eg. are some participants more susceptible to outliers than others?
 
 ```{r}
+Fixations <- Fixations %>% 
+  filter(0 < PositionX & PositionX < 1680) %>%  # Filter X-axis
+  filter(0 < PositionY & PositionY < 1050) %>%  # Filter Y-axis
+  filter(ParticipantID != "Jakob2")
+  
+
+
+Saccades <- Saccades %>% 
+  filter(0 < StartX & StartX < 1680) %>%  # Filter X-axis
+  filter(0 < EndX & EndX < 1680) %>%  # Filter X-axis
+  filter(0 < StartY & StartY < 1050) %>%  # Filter Y-axis
+  filter(0 < EndY & EndY < 1050) %>%   # Filter Y-axis
+  filter(ParticipantID != "Jakob2")
+
+
 
 ```
 
 Then filter out these outlier points:
 
 ```{r}
-
+#Done
 ```
 
 
 ## Inspect distribution of no. of fixations and fixation duration by participant/trial both VISUALLY and NUMERICALLY
 
 ```{r}
+sum_fixations <- Fixations %>% 
+  group_by(ParticipantID) %>% 
+  summarise(sum(FixationNo))
+
+sum_fixations
+hist(sum_fixations$`sum(FixationNo)`)
+rm(sum_fixations)
+
+
+
+mean_fixation_duration <- Fixations %>% 
+  group_by(ParticipantID) %>% 
+  summarise(mean(Duration))
+mean_fixation_duration
+hist(mean_fixation_duration$`mean(Duration)`)
 
 ```
 
@@ -52,6 +87,21 @@ What do you notice? Make sure that nothing looks funky in the data!
 ## Inspect distribution of no. of saccades and saccade amplitude by participant/trial both VISUALLY and NUMERICALLY
 
 ```{r}
+sum_saccades <- Saccades %>% 
+  group_by(ParticipantID) %>% 
+  summarise(sum(SaccadeNo))
+
+sum_saccades
+hist(sum_saccades$`sum(SaccadeNo)`)
+rm(sum_saccades)
+
+
+
+mean_saccades_amplitude <- Saccades %>% 
+  group_by(ParticipantID) %>% 
+  summarise(mean(Amplitude))
+mean_saccades_amplitude
+hist(mean_saccades_amplitude$`mean(Amplitude)`)
 
 ```
 
